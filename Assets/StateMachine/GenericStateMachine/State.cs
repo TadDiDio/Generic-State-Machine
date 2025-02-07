@@ -16,5 +16,14 @@ namespace GenericStateMachine
         /// Called when this state is exited.
         /// </summary>
         public abstract void OnExit();
+
+        /// <summary>
+        /// Makes a string representing this state.
+        /// </summary>
+        /// <returns>This state's name.</returns>
+        public override string ToString()
+        {
+            return GetType().Name;
+        }
     }
 }

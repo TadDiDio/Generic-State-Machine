@@ -12,7 +12,7 @@ public class PlayerController : MonoBehaviour
         WalkState walkState = new();
         SprintState sprintState = new();
         
-        StateMachine groundMachine = new();
+        StateMachine groundMachine = new("Ground");
 
         Func<bool> toIdle   = () => DirectionalInput() == Vector2.zero;
         Func<bool> toWalk   = () => DirectionalInput() != Vector2.zero && (!SprintKey() || DirectionalInput().y < 1);
@@ -32,7 +32,7 @@ public class PlayerController : MonoBehaviour
         FallState fallState = new();
         GrappleState grappleState = new();
 
-        StateMachine airMachine = new();
+        StateMachine airMachine = new("Air");
 
         Func<bool> toFall    = () => !GrappleKey();
         Func<bool> toGrapple = () => GrappleKey();
@@ -43,7 +43,7 @@ public class PlayerController : MonoBehaviour
         airMachine.AddEntranceCondition(fallState, toFall);
         airMachine.AddEntranceCondition(grappleState, toGrapple);
 
-        playerStateMachine = new();
+        playerStateMachine = new("Player");
 
         playerStateMachine.AddTransition(groundMachine, airMachine, () => !grounded);
         playerStateMachine.AddTransition(airMachine, groundMachine, () => grounded);

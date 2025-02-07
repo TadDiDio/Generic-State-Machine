@@ -7,6 +7,11 @@ namespace GenericStateMachine
     public sealed class StateMachine : State
     {
         /// <summary>
+        /// The name of this statemachine.
+        /// </summary>
+        private string name;
+
+        /// <summary>
         /// The current state.
         /// </summary>
         private State currentState = default;
@@ -20,12 +25,43 @@ namespace GenericStateMachine
         /// A mapping of state to all transitions leading away from it.
         /// </summary>
         private Dictionary<State, List<Transition>> stateTransitions = new();
+        
+        /// <summary>
+        /// Makes a new statemachine.
+        /// </summary>
+        /// <param name="name">The name of this state machine.</param>
+        public StateMachine(string name)
+        {
+            this.name = name;
+        }
+
+        /// <summary>
+        /// Returns the name of this state machine.
+        /// </summary>
+        /// <returns>The name of this state machine.</returns>
+        public override string ToString()
+        {
+            return name;
+        }
 
         /// <summary>
         /// Returns the current state.
         /// </summary>
         /// <returns>The current state.</returns>
         public State CurrentState() => currentState;
+
+        /// <summary>
+        /// Gets a formatted string of the current base state.
+        /// </summary>
+        /// <returns>A formatted string of the base most state of this state machine.</returns>
+        public string CurrentStateLog()
+        {
+            if (currentState is StateMachine)
+            {
+                return $"[{ToString()}]->{((StateMachine)currentState).CurrentStateLog()}";
+            }
+            return currentState.ToString();
+        }
 
         /// <summary>
         /// Adds a transition to govern changing states.
@@ -86,9 +122,19 @@ namespace GenericStateMachine
         /// </summary>
         public sealed override void Update()
         {
-            currentState.Update();
+            if (currentState == null)
+            {
+                Debug.LogError($"The current state of {ToString()} is null. Did you call OnEnter on the top level statemachine before calling Update?");
+            }
+            else
+            {
+                currentState.Update();
+            }
 
-            IEnumerable<Transition> transitions = stateTransitions[currentState];
+            if (!stateTransitions.TryGetValue(currentState, out List<Transition> transitions))
+            {
+                Debug.LogWarning($"There are no transitions leading away from {currentState.ToString()}. This is probably unintentional as this state will never be left within this level of the state machine.");
+            }
 
             foreach (var transition in transitions)
             {
